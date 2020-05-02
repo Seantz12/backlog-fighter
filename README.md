@@ -16,3 +16,17 @@ Goals:
 * Have a completed backlog(?) May take up space
 
 But before I do any of that, need to learn flask :'^)
+
+Dependencies:
+Python 3.8, and flask installed.
+I recommend installing flask onto a venv (many guides exist online, typically I just do python3 -m venv venv, then . venv/bin/activate)
+
+How to work on:
+Note these instructions are for linux only
+To start the api server:
+* Type into terminal: export FLASK_APP=flaskr
+* Then: flask run
+
+To start the front end website:
+* cd client
+* npm run serve
