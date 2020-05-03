@@ -22,7 +22,7 @@
 
 <script>
 export default {
-  name: 'table',
+  name: 'vueTable',
   props: ['head', 'rows'],
 };
 </script>

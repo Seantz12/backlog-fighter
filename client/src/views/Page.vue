@@ -1,27 +1,32 @@
 <template>
   <div class="container">
-    <input v-model='backlog_type_input' placeholder='type name'/>
-    <button type="button" class="btn btn-primary" @click='addBacklogType()'>
+    <button type="button" class="btn btn-primary" @click='enableTypeInput()'>
       Add backlog type
     </button>
+    <div class="text-input" v-if="showTypeInput">
+      <input v-model='backlog_type_input' placeholder='type name'/>
+      <button type="button" class="btn btn-primary" @click='addBacklogType()'>
+        Confirm
+      </button>
+    </div>
     <input v-model='backlog_item_input_1' placeholder='item name'/>
     <input v-model='backlog_item_input_2' placeholder='type name'/>
     <button type="button" class="btn btn-primary">
       Add backlog item
     </button>
-    <Table :rows="this.backlog_types" :head="this.backlog_type_headers"/>
+    <VueTable :rows="this.backlog_types" :head="this.backlog_type_headers"/>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
 import FormData from 'form-data';
-import Table from '../components/Table.vue';
+import VueTable from '../components/Table.vue';
 
 export default {
   name: 'page',
   components: {
-    Table,
+    VueTable,
   },
   data() {
     return {
@@ -32,9 +37,13 @@ export default {
       backlog_types: [],
       backlog_items: [],
       backlog_type_headers: ['ID', 'Name'],
+      showTypeInput: false,
     };
   },
   methods: {
+    enableTypeInput() {
+      this.showTypeInput = !this.showTypeInput;
+    },
     addBacklogType() {
       const path = 'http://localhost:5000/backlog/type';
       const form = new FormData();
@@ -45,6 +54,7 @@ export default {
         // eslint-disable-next-line
         console.log(error);
       });
+      this.showTypeInput = false;
     },
     getBacklogType() {
       const path = 'http://localhost:5000/backlog/type';
