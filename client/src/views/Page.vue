@@ -9,17 +9,20 @@
     <button type="button" class="btn btn-primary">
       Add backlog item
     </button>
-    <p>{{backlog_types}}</p>
-    <p>{{backlog_items}}</p>
+    <Table :rows="this.backlog_types" :head="this.backlog_type_headers"/>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
 import FormData from 'form-data';
+import Table from '../components/Table.vue';
 
 export default {
   name: 'page',
+  components: {
+    Table,
+  },
   data() {
     return {
       msg: 'Hello World Vue!',
@@ -28,6 +31,7 @@ export default {
       backlog_item_input_2: '',
       backlog_types: [],
       backlog_items: [],
+      backlog_type_headers: ['ID', 'Name'],
     };
   },
   methods: {
@@ -48,7 +52,7 @@ export default {
         const { types } = response.data;
         this.backlog_types.length = 0;
         for (let i = 0; i < types.length; i += 1) {
-          this.backlog_types.push(types[i]);
+          this.backlog_types.push([types[i]]);
         }
       });
     },
