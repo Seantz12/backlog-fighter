@@ -10,15 +10,15 @@ bp = Blueprint('auth', __name__, url_prefix='/backlog')
 
 @bp.route('/type', methods=('GET', 'POST'))
 def add_type():
-    type_name = request.form['type']
     db = get_db()
     error = None
-    if not type_name:
-        error = 'Type name is required'
-    type_in_db = db.execute(
-        'SELECT id FROM backlog_types WHERE backlog_type = ?', (type_name,)
-    ).fetchone()
     if request.method == 'POST':
+        type_name = request.form['type']
+        type_in_db = db.execute(
+            'SELECT id FROM backlog_types WHERE backlog_type = ?', (type_name,)
+        ).fetchone()
+        if not type_name:
+            error = 'Type name is required'
         if type_in_db is not None:
             error = 'Type name {} is already defined'.format(type_name)
         if error is None:
@@ -28,13 +28,13 @@ def add_type():
             db.commit()
             return jsonify(msg='Success!')
     elif request.method == 'GET':
-        if type_in_db is None:
-            error = 'Type name {} does not exist'.format(type_name)
         if error is None:
-            print(type_in_db['id'])
-            return jsonify(id=str(type_in_db['id']))
+            all_types = db.execute(
+                'SELECT * FROM backlog_types'
+            ).fetchall()
+            all_type_names = [row['backlog_type'] for row in all_types]
+            return jsonify(types=all_type_names)
     return error
-    # flash(error)
 
 def convert_backlog_row_to_json(row):
     return jsonify(

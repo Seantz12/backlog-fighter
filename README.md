@@ -30,3 +30,8 @@ To start the api server:
 To start the front end website:
 * cd client
 * npm run serve
+
+
+TODO:
+* Properly take input on Page.vue
+* Document the current routes/api and what they do
