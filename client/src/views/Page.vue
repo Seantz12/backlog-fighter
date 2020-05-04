@@ -15,6 +15,7 @@
       Add backlog item
     </button>
     <VueTable :rows="this.backlog_types" :head="this.backlog_type_headers"/>
+    <VueTable :rows="this.backlog_items" :head="this.backlog_item_headers"/>
   </div>
 </template>
 
@@ -37,7 +38,9 @@ export default {
       backlog_types: [],
       backlog_items: [],
       backlog_type_headers: ['ID', 'Name'],
+      backlog_item_headers: ['ID', 'Type Name', 'Item Name', 'Created Date', 'Goal Date'],
       showTypeInput: false,
+      showType: '',
     };
   },
   methods: {
@@ -66,9 +69,25 @@ export default {
         }
       });
     },
+    getBacklogItems() {
+      const path = 'http://localhost:5000/backlog/item';
+      axios.get(path).then((response) => {
+        const { data } = response;
+        this.backlog_items.length = 0;
+        for (let i = 0; i < data.length; i += 1) {
+          const rowItems = [];
+          rowItems.push(data[i].backlog_type);
+          rowItems.push(data[i].task_name);
+          rowItems.push(data[i].created);
+          rowItems.push(data[i].goal_date);
+          this.backlog_items.push(rowItems);
+        }
+      });
+    },
   },
   created() {
     this.getBacklogType();
+    this.getBacklogItems();
   },
 };
 </script>
