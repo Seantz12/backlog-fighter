@@ -4,18 +4,43 @@
       Add backlog type
     </button>
     <div class="text-input" v-if="showTypeInput">
-      <input v-model='backlog_type_input' placeholder='type name'/>
+      <input v-model='backlogTypeInput' placeholder='type name'/>
       <button type="button" class="btn btn-primary" @click='addBacklogType()'>
         Confirm
       </button>
     </div>
-    <input v-model='backlog_item_input_1' placeholder='item name'/>
-    <input v-model='backlog_item_input_2' placeholder='type name'/>
+    <input v-model='backlogItemInput1' placeholder='item name'/>
+    <input v-model='backlogItemInput2' placeholder='type name'/>
     <button type="button" class="btn btn-primary">
       Add backlog item
     </button>
-    <VueTable :rows="this.backlog_types" :head="this.backlog_type_headers"/>
-    <VueTable :rows="this.backlog_items" :head="this.backlog_item_headers"/>
+    <VueTable :rows="this.backlogTypes" :head="this.backlogTypeHeaders"/>
+    <div class="filtered-items">
+      <p v-for="(item, key) in this.sortParameters.types" :key="key">
+        {{item}}
+      </p>
+    </div>
+    <div class="dropdown">
+      <button
+        class="btn btn-secondary dropdown-toggle"
+        type="button"
+        id="dropdownMenuButton"
+        @click="enableFilterDropdown()"
+        aria-haspopup="true"
+        aria-expanded="false">
+        Dropdown button
+      </button>
+      <div v-show="showTypeFilter" aria-labelledby="dropdownMenuButton">
+        <a
+          class="dropdown-item"
+          v-for="(item, key) in notTypeFilters"
+          :key="key"
+          @click="addFilter(item)">
+          {{item}}
+        </a>
+      </div>
+    </div>
+    <VueTable :rows="this.backlogItems" :head="this.backlogItemHeaders"/>
   </div>
 </template>
 
@@ -29,28 +54,50 @@ export default {
   components: {
     VueTable,
   },
+  computed: {
+    notTypeFilters() {
+      const typeFilters = [];
+      this.backlogTypes.map((element) => typeFilters.push(element[0]));
+      return typeFilters.filter((element) => !(this.sortParameters.types.includes(element)));
+    },
+  },
   data() {
     return {
       msg: 'Hello World Vue!',
-      backlog_type_input: '',
-      backlog_item_input_1: '', // PLACEHOLDERS GOD PLEASE REPLACE THESE ^ v
-      backlog_item_input_2: '',
-      backlog_types: [],
-      backlog_items: [],
-      backlog_type_headers: ['ID', 'Name'],
-      backlog_item_headers: ['ID', 'Type Name', 'Item Name', 'Created Date', 'Goal Date'],
+      backlogTypeInput: '',
+      backlogItemInput1: '', // PLACEHOLDERS GOD PLEASE REPLACE THESE ^ v
+      backlogItemInput2: '',
+      backlogTypes: [],
+      backlogItems: [],
+      backlogTypeHeaders: ['ID', 'Name'],
+      backlogItemHeaders: ['ID', 'Type Name', 'Item Name', 'Created Date', 'Goal Date'],
+      sortParameters: {
+        order: { parameter: 'Name', ascending: false },
+        searchFilter: '',
+        types: [],
+        // consider adding date range sort
+      },
+      // notTypeFilters: [],
       showTypeInput: false,
+      showTypeFilter: false,
       showType: '',
     };
   },
   methods: {
+    addFilter(item) {
+      this.sortParameters.types.push(item);
+      // send filter request to change backlog items here
+    },
     enableTypeInput() {
       this.showTypeInput = !this.showTypeInput;
+    },
+    enableFilterDropdown() {
+      this.showTypeFilter = !this.showTypeFilter;
     },
     addBacklogType() {
       const path = 'http://localhost:5000/backlog/type';
       const form = new FormData();
-      form.append('type', this.backlog_type_input);
+      form.append('type', this.backlogTypeInput);
       axios.post(path, form).then(() => {
         this.getBacklogType();
       }).catch((error) => {
@@ -63,9 +110,10 @@ export default {
       const path = 'http://localhost:5000/backlog/type';
       axios.get(path).then((response) => {
         const { types } = response.data;
-        this.backlog_types.length = 0;
+        this.backlogTypes.length = 0;
+        // this.typeFilters.length = 0;
         for (let i = 0; i < types.length; i += 1) {
-          this.backlog_types.push([types[i]]);
+          this.backlogTypes.push([types[i]]);
         }
       });
     },
@@ -73,17 +121,18 @@ export default {
       const path = 'http://localhost:5000/backlog/item';
       axios.get(path).then((response) => {
         const { data } = response;
-        this.backlog_items.length = 0;
+        this.backlogItems.length = 0;
         for (let i = 0; i < data.length; i += 1) {
           const rowItems = [];
           rowItems.push(data[i].backlog_type);
           rowItems.push(data[i].task_name);
           rowItems.push(data[i].created);
           rowItems.push(data[i].goal_date);
-          this.backlog_items.push(rowItems);
+          this.backlogItems.push(rowItems);
         }
       });
     },
+
   },
   created() {
     this.getBacklogType();
