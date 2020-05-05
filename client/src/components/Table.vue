@@ -3,7 +3,11 @@
     <table class="table">
       <thead>
         <tr class="first-row">
-          <th scope="col" v-for="(item, key) in this.head" :key="key">
+          <th
+            scope="col"
+            v-for="(item, key) in this.head"
+            :key="key"
+            @click="clicked(item)">
             {{item}}
           </th>
         </tr>
@@ -23,6 +27,11 @@
 <script>
 export default {
   name: 'vueTable',
+  methods: {
+    clicked(item) {
+      this.$emit('clicked', item);
+    },
+  },
   props: ['head', 'rows'],
 };
 </script>

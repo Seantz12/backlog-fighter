@@ -16,7 +16,7 @@
     </button>
     <VueTable :rows="this.backlogTypes" :head="this.backlogTypeHeaders"/>
     <div class="filtered-items">
-      <p v-for="(item, key) in this.sortParameters.types" :key="key">
+      <p v-for="(item, key) in this.sortParameters.types" :key="key" @click="removeFilter(item)">
         {{item}}
       </p>
     </div>
@@ -40,7 +40,10 @@
         </a>
       </div>
     </div>
-    <VueTable :rows="this.backlogItems" :head="this.backlogItemHeaders"/>
+    <VueTable
+      :rows="this.backlogItems"
+      :head="this.backlogItemHeaders"
+      @clicked="sortHeader"/>
   </div>
 </template>
 
@@ -88,6 +91,10 @@ export default {
       this.sortParameters.types.push(item);
       // send filter request to change backlog items here
     },
+    removeFilter(item) {
+      const index = this.sortParameters.types.indexOf(item);
+      this.sortParameters.types.splice(index, 1);
+    },
     enableTypeInput() {
       this.showTypeInput = !this.showTypeInput;
     },
@@ -132,7 +139,14 @@ export default {
         }
       });
     },
-
+    sortHeader(name) {
+      // eslint-disable-next-line
+      console.log(name);
+      if (this.sortParameters.order.parameter === name) {
+        this.sortParameters.order.ascending = !this.sortParameters.order.ascending;
+      }
+      this.sortParameters.order.parameter = name;
+    },
   },
   created() {
     this.getBacklogType();
