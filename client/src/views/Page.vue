@@ -1,24 +1,10 @@
 <template>
   <div class="container">
-    <button type="button" class="btn btn-primary" @click='enableTypeInput()'>
-      Add backlog type
-    </button>
-    <div class="text-input" v-if="showTypeInput">
-      <input v-model='backlogTypeInput' placeholder='type name'/>
-      <button type="button" class="btn btn-primary" @click='addBacklogType()'>
-        Confirm
-      </button>
-    </div>
-    <input v-model='backlogItemInput1' placeholder='item name'/>
-    <input v-model='backlogItemInput2' placeholder='type name'/>
-    <button type="button" class="btn btn-primary">
-      Add backlog item
-    </button>
-    <VueTable :rows="this.backlogTypes" :head="this.backlogTypeHeaders"/>
     <div class="filtered-items">
-      <p v-for="(item, key) in this.sortParameters.types" :key="key" @click="removeFilter(item)">
+      <a href="#"
+        v-for="(item, key) in this.sortParameters.types" :key="key" @click="removeFilter(item)">
         {{item}}
-      </p>
+      </a>
     </div>
     <div class="dropdown">
       <button
@@ -40,10 +26,52 @@
         </a>
       </div>
     </div>
+    <button type="button" class="btn btn-primary" @click='showTypeModal=true'>
+      Add backlog type
+    </button>
+    <div class="text-input" v-if="showTypeInput">
+    </div>
+    <button type="button" class="btn btn-primary" @click='showItemModal=true'>
+      Add backlog item
+    </button>
+    <VueTable :rows="this.backlogTypes" :head="this.backlogTypeHeaders"/>
     <VueTable
       :rows="this.backlogItems"
       :head="this.backlogItemHeaders"
       @clicked="sortHeader"/>
+    <Modal v-if="showTypeModal">
+      <template v-slot:header>
+        <h1>Add a new Backlog Type</h1>
+      </template>
+      <template v-slot:content>
+        <input v-model='backlogTypeInput' placeholder='type name'/>
+      </template>
+      <template v-slot:footer>
+        <button type="button" class="btn btn-primary" @click='addBacklogType()'>
+          Confirm
+        </button>
+        <button @click="showTypeModal=false">
+         Cancel
+        </button>
+      </template>
+    </Modal>
+    <Modal v-if="showItemModal">
+      <template v-slot:header>
+        <h1>Add a new Backlog Item</h1>
+      </template>
+      <template v-slot:content>
+        <input v-model='backlogItemInput1' placeholder='item name'/>
+        <input v-model='backlogItemInput2' placeholder='type name'/>
+      </template>
+      <template v-slot:footer>
+        <button type="button" class="btn btn-primary">
+          Confirm
+        </button>
+        <button @click="showItemModal=false">
+         Cancel
+        </button>
+      </template>
+    </Modal>
   </div>
 </template>
 
@@ -51,11 +79,13 @@
 import axios from 'axios';
 import FormData from 'form-data';
 import VueTable from '../components/Table.vue';
+import Modal from '../components/Modal.vue';
 
 export default {
   name: 'page',
   components: {
     VueTable,
+    Modal,
   },
   computed: {
     notTypeFilters() {
@@ -84,6 +114,8 @@ export default {
       showTypeInput: false,
       showTypeFilter: false,
       showType: '',
+      showTypeModal: false,
+      showItemModal: false,
     };
   },
   methods: {
@@ -111,7 +143,7 @@ export default {
         // eslint-disable-next-line
         console.log(error);
       });
-      this.showTypeInput = false;
+      this.showTypeModal = false;
     },
     getBacklogType() {
       const path = 'http://localhost:5000/backlog/type';
