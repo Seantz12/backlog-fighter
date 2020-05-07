@@ -6,24 +6,35 @@
         {{item}}
       </a>
     </div>
-    <div class="dropdown">
-      <button
-        class="btn btn-secondary dropdown-toggle"
-        type="button"
-        id="dropdownMenuButton"
-        @click="enableFilterDropdown()"
-        aria-haspopup="true"
-        aria-expanded="false">
-        Dropdown button
-      </button>
-      <div v-show="showTypeFilter" aria-labelledby="dropdownMenuButton">
-        <a
-          class="dropdown-item"
-          v-for="(item, key) in notTypeFilters"
-          :key="key"
-          @click="addFilter(item)">
-          {{item}}
-        </a>
+    <div class="filters">
+      <div class="dropdown">
+        <button
+          class="btn btn-secondary dropdown-toggle"
+          type="button"
+          id="dropdownMenuButton"
+          @click="enableFilterDropdown()"
+          aria-haspopup="true"
+          aria-expanded="false">
+        Select Type
+        </button>
+        <div
+          class="dropdown-container"
+          v-show="showTypeFilter"
+          aria-labelledby="dropdownMenuButton">
+          <div
+            class="dropdown-item-container"
+            v-for="(item, key) in notTypeFilters"
+            :key="key">
+            <a
+              class="dropdown-item"
+              @click="addFilter(item)">
+              {{item}}
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="search-filter">
+        <input v-model="this.sortParameters.searchFilter"/>
       </div>
     </div>
     <button type="button" class="btn btn-primary" @click='showTypeModal=true'>
@@ -110,7 +121,6 @@ export default {
         types: [],
         // consider adding date range sort
       },
-      // notTypeFilters: [],
       showTypeInput: false,
       showTypeFilter: false,
       showType: '',
@@ -150,7 +160,6 @@ export default {
       axios.get(path).then((response) => {
         const { types } = response.data;
         this.backlogTypes.length = 0;
-        // this.typeFilters.length = 0;
         for (let i = 0; i < types.length; i += 1) {
           this.backlogTypes.push([types[i]]);
         }
@@ -186,3 +195,26 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.filters {
+  display: flex;
+}
+.dropdown-item {
+  background-color: white;
+  border: 1px solid;
+}
+
+.dropdown-item:hover {
+  background-color: blue;
+  color: white;
+  border: 1px solid;
+}
+.dropdown-container {
+  position: absolute;
+}
+.dropdown-item-container {
+  margin-top: 15px auto;
+
+}
+</style>
