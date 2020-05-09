@@ -37,13 +37,13 @@ def add_type():
     return error
 
 def convert_backlog_row_to_json(row):
-    return jsonify(
-        id=row['id'],
-        backlog_type=row['backlog_type'],
-        task_name=row['task_name'],
-        created=row['created'],
-        goal_date=row['goal_date']
-    )
+    return {
+        'id': row['id'],
+        'backlog_type': row['backlog_type'],
+        'task_name': row['task_name'],
+        'created': str(row['created']),
+        'goal_date': str(row['goal_date'])
+    }
 
 @bp.route('/item', methods=('GET', 'POST'))
 def item():
@@ -71,9 +71,15 @@ def item():
         return jsonify(msg='Success!')
     # elif request.method == 'GET':
     else:
+        if not request.form.get("id", None):
+            rows = db.execute(
+                'SELECT * FROM backlog'
+            ).fetchall()
+            all_rows = []
+            for row in rows:
+                all_rows.append(convert_backlog_row_to_json(row))
+            return jsonify(all_rows)
         id = request.form['backlog_id']
-        if not id:
-            return jsonify(error='No ID provided')
         row = db.execute(
             'SELECT * FROM backlog WHERE id = ?', (id,)
         ).fetchone()
