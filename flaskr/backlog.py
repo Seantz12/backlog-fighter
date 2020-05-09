@@ -48,44 +48,48 @@ def convert_backlog_row_to_json(row):
         'goal_date': str(row['goal_date'])
     }
 
+def add_item(form, db):
+    type_id = form['type_id']
+    task_name = form['name']
+    if not type_id:
+        return jsonify(error='No type provided')
+    elif not task_name:
+        return jsonify(error='No task name provided')
+    if not form.get('goal_date', None):
+        db.execute(
+            'INSERT INTO backlog (backlog_type, task_name) VALUES (?, ?)', 
+            (type_id, task_name,)
+        )
+    else:
+        goal_date = form['goal_date'] # temporary
+        db.execute(
+            'INSERT INTO backlog (backlog_type, task_name, goal_date) VALUES (?, ?, ?)', 
+            (type_id, type_name, goal_date)
+        )
+    db.commit()
+    return jsonify(msg='Success!')
+
+def get_item(form, db):
+    if not form.get('backlog_id', None):
+        rows = db.execute(
+            'SELECT * FROM backlog'
+        ).fetchall()
+        all_rows = []
+        for row in rows:
+            all_rows.append(convert_backlog_row_to_json(row))
+        return jsonify(all_rows)
+    id = request.form['backlog_id']
+    row = db.execute(
+        'SELECT * FROM backlog WHERE id = ?', (id,)
+    ).fetchone()
+    if row is None:
+        return jsonify(error='No backlog matches that id!')
+    return convert_backlog_row_to_json(row)
+
 @bp.route('/item', methods=('GET', 'POST'))
 def item_handler():
     db = get_db()
     if request.method == 'POST':
-        type_id = request.form['type_id']
-        task_name = request.form['name']
-        goal_date = None
-        # goal_date = request.form['date']
-        if not type_id:
-            return jsonify(error='No type provided')
-        elif not task_name:
-            return jsonify(error='No task name provided')
-        if not goal_date:
-            db.execute(
-                'INSERT INTO backlog (backlog_type, task_name) VALUES (?, ?)', 
-                (type_id, task_name,)
-            )
-        else:
-            db.execute(
-                'INSERT INTO backlog (backlog_type, task_name, goal_date) VALUES (?, ?, ?)', 
-                (type_id, type_name, goal_date)
-            )
-        db.commit()
-        return jsonify(msg='Success!')
-    # elif request.method == 'GET':
-    else:
-        if not request.form.get("id", None):
-            rows = db.execute(
-                'SELECT * FROM backlog'
-            ).fetchall()
-            all_rows = []
-            for row in rows:
-                all_rows.append(convert_backlog_row_to_json(row))
-            return jsonify(all_rows)
-        id = request.form['backlog_id']
-        row = db.execute(
-            'SELECT * FROM backlog WHERE id = ?', (id,)
-        ).fetchone()
-        if row is None:
-            return jsonify(error='No backlog matches that id!')
-        return convert_backlog_row_to_json(row)
+        return add_item(request.form, db)
+    elif request.method == 'GET':
+        return get_item(request.form, db)
