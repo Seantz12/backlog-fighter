@@ -8,43 +8,21 @@ from flaskr.db import get_db
 
 bp = Blueprint('auth', __name__, url_prefix='/backlog')
 
-def add_type(form, db):
-    type_name = form['type']
-    type_in_db = db.execute(
-        'SELECT id FROM backlog_types WHERE backlog_type = ?', (type_name,)
-    ).fetchone()
-    if not type_name:
-        return jsonify(error='Type name is required!')
-    if type_in_db is not None:
-        return jsonify(error='Type name {} is already defined.'.format(type_name))
-    db.execute(
-        'INSERT INTO backlog_types (backlog_type) VALUES (?)', (type_name,)
-    )
-    db.commit()
-    return jsonify(msg='Success!')
-
 def get_types(form, db):
-    if not form.get('type', None):
-        all_types = db.execute(
-            'SELECT * FROM backlog_types'
-        ).fetchall()
-        all_type_names = [row['backlog_type'] for row in all_types]
-        return jsonify(types=all_type_names)
-    type_id = db.execute(
-        'SELECT id FROM backlog_types WHERE backlog_type = ?', (type_name,)
-    ).fetchone()
-    if type_id is None:
-        return jsonify(error='Type name {} does not exist'.format(type_name))
-    return jsonify(id=type_id)
+    all_types = db.execute(
+        'SELECT DISTINCT backlog_type FROM backlog'
+    ).fetchall()
+    all_type_names = [row['backlog_type'] for row in all_types]
+    return jsonify(types=all_type_names)
 
 
 @bp.route('/type', methods=('GET', 'POST'))
 def type_handler():
     db = get_db()
-    if request.method == 'POST':
-        return add_type(request.form, db)
-    elif request.method == 'GET':
+    if request.method == 'GET':
         return get_types(request.form, db)
+    else:
+        return jsonify(error='Invalid request type')
 
 def convert_backlog_row_to_json(row):
     return {

@@ -37,22 +37,22 @@
         <input v-model="this.sortParameters.searchFilter"/>
       </div>
     </div>
-
+<!--
     <button type="button" class="btn btn-primary" @click='showTypeModal=true'>
       Add backlog type
-    </button>
+    </button> -->
     <button type="button" class="btn btn-primary" @click='showItemModal=true'>
       Add backlog item
     </button>
 
-    <VueTable :rows="this.backlogTypes" :head="this.backlogTypeHeaders"/>
+    <!-- <VueTable :rows="this.backlogTypes" :head="this.backlogTypeHeaders"/> -->
 
     <VueTable
       :rows="this.backlogItems"
       :head="this.backlogItemHeaders"
       @clicked="sortHeader"/>
 
-    <Modal v-if="showTypeModal">
+    <!-- <Modal v-if="showTypeModal">
       <template v-slot:header>
         <h1>Add a new Backlog Type</h1>
       </template>
@@ -67,7 +67,7 @@
          Cancel
         </button>
       </template>
-    </Modal>
+    </Modal> -->
 
     <Modal v-if="showItemModal">
       <template v-slot:header>
@@ -176,11 +176,12 @@ export default {
       const pathItem = 'http://localhost:5000/backlog/item';
       axios.post(pathItem, form).then(() => {
         this.getBacklogItems();
+        this.getBacklogType();
       }).catch((error) => {
         // eslint-disable-next-line
         console.log(error);
       });
-      this.showTypeModal = false;
+      this.showItemModal = false;
     },
     getBacklogItems() {
       const path = 'http://localhost:5000/backlog/item';

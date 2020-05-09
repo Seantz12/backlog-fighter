@@ -11,6 +11,5 @@ CREATE TABLE backlog (
     backlog_type INTEGER NOT NULL,
     task_name TEXT NOT NULL,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    goal_date DATETIME,
-    FOREIGN KEY (backlog_type) REFERENCES backlog_types (id)
+    goal_date DATETIME
 );
