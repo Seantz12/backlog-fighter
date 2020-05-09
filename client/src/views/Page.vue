@@ -37,19 +37,21 @@
         <input v-model="this.sortParameters.searchFilter"/>
       </div>
     </div>
+
     <button type="button" class="btn btn-primary" @click='showTypeModal=true'>
       Add backlog type
     </button>
-    <div class="text-input" v-if="showTypeInput">
-    </div>
     <button type="button" class="btn btn-primary" @click='showItemModal=true'>
       Add backlog item
     </button>
+
     <VueTable :rows="this.backlogTypes" :head="this.backlogTypeHeaders"/>
+
     <VueTable
       :rows="this.backlogItems"
       :head="this.backlogItemHeaders"
       @clicked="sortHeader"/>
+
     <Modal v-if="showTypeModal">
       <template v-slot:header>
         <h1>Add a new Backlog Type</h1>
@@ -66,16 +68,17 @@
         </button>
       </template>
     </Modal>
+
     <Modal v-if="showItemModal">
       <template v-slot:header>
         <h1>Add a new Backlog Item</h1>
       </template>
       <template v-slot:content>
-        <input v-model='backlogItemInput1' placeholder='item name'/>
-        <input v-model='backlogItemInput2' placeholder='type name'/>
+        <input v-model='backlogItemName' placeholder='item name'/>
+        <input v-model='backlogItemType' placeholder='type name'/>
       </template>
       <template v-slot:footer>
-        <button type="button" class="btn btn-primary">
+        <button type="button" class="btn btn-primary" @click='addBacklogItem()'>
           Confirm
         </button>
         <button @click="showItemModal=false">
@@ -83,6 +86,7 @@
         </button>
       </template>
     </Modal>
+
   </div>
 </template>
 
@@ -109,8 +113,8 @@ export default {
     return {
       msg: 'Hello World Vue!',
       backlogTypeInput: '',
-      backlogItemInput1: '', // PLACEHOLDERS GOD PLEASE REPLACE THESE ^ v
-      backlogItemInput2: '',
+      backlogItemName: '', // PLACEHOLDERS GOD PLEASE REPLACE THESE ^ v
+      backlogItemType: '',
       backlogTypes: [],
       backlogItems: [],
       backlogTypeHeaders: ['ID', 'Name'],
@@ -164,6 +168,19 @@ export default {
           this.backlogTypes.push([types[i]]);
         }
       });
+    },
+    addBacklogItem() {
+      const form = new FormData();
+      form.append('name', this.backlogItemName);
+      form.append('type_id', this.backlogItemType);
+      const pathItem = 'http://localhost:5000/backlog/item';
+      axios.post(pathItem, form).then(() => {
+        this.getBacklogItems();
+      }).catch((error) => {
+        // eslint-disable-next-line
+        console.log(error);
+      });
+      this.showTypeModal = false;
     },
     getBacklogItems() {
       const path = 'http://localhost:5000/backlog/item';

@@ -23,12 +23,19 @@ def add_type(form, db):
     db.commit()
     return jsonify(msg='Success!')
 
-def get_all_types(db):
-    all_types = db.execute(
-        'SELECT * FROM backlog_types'
-    ).fetchall()
-    all_type_names = [row['backlog_type'] for row in all_types]
-    return jsonify(types=all_type_names)
+def get_types(form, db):
+    if not form.get('type', None):
+        all_types = db.execute(
+            'SELECT * FROM backlog_types'
+        ).fetchall()
+        all_type_names = [row['backlog_type'] for row in all_types]
+        return jsonify(types=all_type_names)
+    type_id = db.execute(
+        'SELECT id FROM backlog_types WHERE backlog_type = ?', (type_name,)
+    ).fetchone()
+    if type_id is None:
+        return jsonify(error='Type name {} does not exist'.format(type_name))
+    return jsonify(id=type_id)
 
 
 @bp.route('/type', methods=('GET', 'POST'))
@@ -37,7 +44,7 @@ def type_handler():
     if request.method == 'POST':
         return add_type(request.form, db)
     elif request.method == 'GET':
-        return get_all_types(db)
+        return get_types(request.form, db)
 
 def convert_backlog_row_to_json(row):
     return {
