@@ -97,7 +97,7 @@ export default {
       backlogTypeHeaders: ['ID', 'Name'],
       backlogItemHeaders: ['ID', 'Type Name', 'Item Name', 'Created Date', 'Goal Date'],
       sortParameters: {
-        order: { parameter: 'Name', ascending: false },
+        order: { parameter: 'id', ascending: true },
         searchFilter: '',
         types: [],
         // consider adding date range sort
@@ -112,11 +112,12 @@ export default {
   methods: {
     addFilter(item) {
       this.sortParameters.types.push(item);
-      // send filter request to change backlog items here
+      this.getBacklogItems();
     },
     removeFilter(item) {
       const index = this.sortParameters.types.indexOf(item);
       this.sortParameters.types.splice(index, 1);
+      this.getBacklogItems();
     },
     enableTypeInput() {
       this.showTypeInput = !this.showTypeInput;
@@ -163,8 +164,21 @@ export default {
       this.showItemModal = false;
     },
     getBacklogItems() {
-      const path = 'http://localhost:5000/backlog/item';
-      axios.get(path).then((response) => {
+      let types = '';
+      for (let i = 0; i < this.sortParameters.types.length; i += 1) {
+        types += this.sortParameters.types[i];
+        types += ',';
+      }
+      types.slice(0, -1);
+      const path = 'http://localhost:5000/backlog/item?';
+      axios.get(path, {
+        params: {
+          column: this.sortParameters.order.parameter,
+          ascending: this.sortParameters.order.ascending ? 'true' : 'false',
+          search: this.sortParameters.searchFilter,
+          types,
+        },
+      }).then((response) => {
         const { data } = response;
         this.backlogItems.length = 0;
         for (let i = 0; i < data.length; i += 1) {
@@ -175,6 +189,9 @@ export default {
           rowItems.push(data[i].goal_date);
           this.backlogItems.push(rowItems);
         }
+      }).catch((error) => {
+        // eslint-disable-next-line
+        console.log(error);
       });
     },
     sortHeader(name) {
